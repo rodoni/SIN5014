@@ -27,24 +27,42 @@ def show_separeted_channels(B, G, R):
     plt.imshow(R, cmap=plt.get_cmap('Reds'))
     plt.show()
 
-img = mpimg.imread('/home/rodoni/cat.jpeg')
-print(img.shape)
+
+def histogram(channel, resolution ):
+
+    matrix = np.array(channel)
+    matrix = matrix.astype(int)
+    lines, columns = matrix.shape
+    histogram_array = np.zeros(resolution).astype(int)
+
+    for line in range(lines):
+        for column in range(columns):
+            histogram_array[matrix.item(line, column)] = histogram_array[matrix.item(line, column)] + 1
+
+    return histogram_array
+
+img = mpimg.imread('D:/Pictures/blank.jpg')
+#print(img.shape)
 gray = rgb2gray(img)
-print(gray)
-print(gray.item(0, 0))
+#print(gray)
+#print(gray.item(0, 0))
 
 [B, G, R] = cv2.split(img)
 
 #img_concat = np.append([B], [G], [R], axis=0)
 #print(img_concat.shape)
 merged_image = cv2.merge((B, G, R))
-#show_separeted_channels(B, G ,R )
 
-plt.imshow(merged_image)
-plt.show()
+histogram_array = histogram(B, 256)
 
-print(gray.shape)
-print(B.shape)
+print(histogram_array.shape)
+print(histogram_array)
+
+#plt.imshow(gray,cmap = "gray")
+#plt.show()
+
+#print(gray.shape)
+#print(B.shape)
 
 
 plt.show()
