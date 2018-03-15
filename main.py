@@ -41,7 +41,15 @@ def histogram(channel, resolution ):
 
     return histogram_array
 
-img = mpimg.imread('D:/Pictures/blank.jpg')
+def plot_histogram(histogram_array):
+
+    x_axis = np.arange(histogram_array.size)
+    plt.bar(x_axis, histogram_array,0.5)
+    #plt.xticks([])
+    #plt.yticks([])
+    plt.show()
+
+img = mpimg.imread('D:/Pictures/elephant.jpg')
 #print(img.shape)
 gray = rgb2gray(img)
 #print(gray)
@@ -52,18 +60,21 @@ gray = rgb2gray(img)
 #img_concat = np.append([B], [G], [R], axis=0)
 #print(img_concat.shape)
 merged_image = cv2.merge((B, G, R))
+#print(gray.shape)
 
-histogram_array = histogram(B, 256)
-
+histogram_array = histogram(gray, 256)
 print(histogram_array.shape)
-print(histogram_array)
+plot_histogram(histogram_array)
 
-#plt.imshow(gray,cmap = "gray")
+#print(histogram_array.shape)
+#print(histogram_array)
+
+#plt.imshow(R,cmap = "Reds")
 #plt.show()
 
 #print(gray.shape)
 #print(B.shape)
 
 
-plt.show()
+#plt.show()
 
