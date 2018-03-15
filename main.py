@@ -27,7 +27,7 @@ def show_separeted_channels(B, G, R):
     plt.imshow(R, cmap=plt.get_cmap('Reds'))
     plt.show()
 
-
+# histogram
 def histogram(channel, resolution ):
 
     matrix = np.array(channel)
@@ -41,30 +41,91 @@ def histogram(channel, resolution ):
 
     return histogram_array
 
+
+# show histogram_graph
 def plot_histogram(histogram_array):
 
     x_axis = np.arange(histogram_array.size)
     plt.bar(x_axis, histogram_array,0.5)
-    #plt.xticks([])
-    #plt.yticks([])
     plt.show()
 
-img = mpimg.imread('D:/Pictures/elephant.jpg')
+
+# change the intensity
+def change_intesity(matrix, parameter):
+
+    # if the image is rgb
+    if matrix.ndim > 2:
+        lines, columns, channels = matrix.shape
+
+        for line in range(lines):
+            for column in range(columns):
+                for channel in range(channels):
+                    temp = matrix.item(line, column, channel) + parameter
+                    if temp > 255:
+                        matrix[line][column][channel] = 255
+
+                    elif temp < 0:
+                        matrix[line][column][channel] = 0
+
+                    else:
+                        matrix[line][column][channel] = temp
+
+    # if the image is in gray scale
+    else:
+        lines, columns = matrix.shape
+
+        for line in range(lines):
+            for column in range(columns):
+                temp = matrix.item(line, column) + parameter
+
+                if temp > 255:
+                    matrix[line][column] = 255
+
+                elif temp < 0:
+                    matrix[line][column] = 0
+
+                else:
+                    matrix[line][column] = temp
+
+    return matrix
+
+
+
+img = mpimg.imread('/home/rodoni/cat.jpeg')
 #print(img.shape)
 gray = rgb2gray(img)
-#print(gray)
+
+
+
+img_modified = np.array(img)
+img_modified = change_intesity(img_modified, -50)
+print(img_modified[0][0][0])
+print(img[0][0][0])
+
+plt.imshow(img_modified)
+plt.show()
+
+plt.imshow(img)
+plt.show()
+
+
+
 #print(gray.item(0, 0))
 
 [B, G, R] = cv2.split(img)
+
+#print(img[0][1][1])
+#print(img.item(0,1,2))
+#print(img)
 
 #img_concat = np.append([B], [G], [R], axis=0)
 #print(img_concat.shape)
 merged_image = cv2.merge((B, G, R))
 #print(gray.shape)
 
-histogram_array = histogram(gray, 256)
-print(histogram_array.shape)
-plot_histogram(histogram_array)
+#histogram_array = histogram(gray, 256)
+#print(histogram_array.shape)
+#plot_histogram(histogram_array)
 
 #print(histogram_array.shape)
 #print(histogram_array)
