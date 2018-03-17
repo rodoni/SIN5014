@@ -27,13 +27,14 @@ def show_separeted_channels(B, G, R):
     plt.imshow(R, cmap=plt.get_cmap('Reds'))
     plt.show()
 
+
 # histogram
 def histogram(channel, resolution ):
 
     matrix = np.array(channel)
     matrix = matrix.astype(int)
     lines, columns = matrix.shape
-    histogram_array = np.zeros(resolution).astype(int)
+    histogram_array = np.zeros(resolution)
 
     for line in range(lines):
         for column in range(columns):
@@ -50,92 +51,132 @@ def plot_histogram(histogram_array):
     plt.show()
 
 
-# change the intensity
+# change the intensity of one channel
 def change_intesity(matrix, parameter):
 
-    # if the image is rgb
-    if matrix.ndim > 2:
-        lines, columns, channels = matrix.shape
+    lines, columns = matrix.shape
 
-        for line in range(lines):
-            for column in range(columns):
-                for channel in range(channels):
-                    temp = matrix.item(line, column, channel) + parameter
-                    if temp > 255:
-                        matrix[line][column][channel] = 255
+    for line in range(lines):
+        for column in range(columns):
+            temp = matrix.item(line, column) + parameter
 
-                    elif temp < 0:
-                        matrix[line][column][channel] = 0
-
-                    else:
-                        matrix[line][column][channel] = temp
-
-    # if the image is in gray scale
-    else:
-        lines, columns = matrix.shape
-
-        for line in range(lines):
-            for column in range(columns):
-                temp = matrix.item(line, column) + parameter
-
-                if temp > 255:
-                    matrix[line][column] = 255
-
-                elif temp < 0:
-                    matrix[line][column] = 0
-
-                else:
-                    matrix[line][column] = temp
+            if temp > 255:
+                matrix[line][column] = 255
+            elif temp < 0:
+                matrix[line][column] = 0
+            else:
+                matrix[line][column] = temp
 
     return matrix
 
 
+def smoothing_average( matrix ):
 
-img = mpimg.imread('/home/rodoni/cat.jpeg')
-#print(img.shape)
+    lines, columns = matrix.shape
+    print(lines)
+    print(columns)
+
+    for line in range(lines):
+        for column in range(columns):
+            mask = []
+
+            for x in -1, 0, 1:
+                for y in -1, 0, 1:
+                    if line + x >= 0 and line +x < lines and column + y >= 0 and column + y < columns:
+                        mask.append(matrix.item(line+x, column+y))
+
+            matrix[line][column] = sum(mask)/len(mask)
+
+    return matrix
+
+
+def smoothing_median( matrix ):
+
+    lines, columns = matrix.shape
+
+    for line in range(lines):
+        for column in range(columns):
+            mask = []
+
+            for x in -1, 0, 1:
+                for y in -1, 0, 1:
+                    if line + x >= 0 and line +x < lines and column + y >= 0 and column + y < columns:
+                        mask.append(matrix.item(line+x, column+y))
+
+            mask = np.sort(mask)
+            index = len(mask)/2
+            matrix[line][column] = mask[int(index)]
+
+    return matrix
+
+
+def equalization ( matrix, histogram_image ):
+
+    size = histogram_image.size
+    histogram_cumulative = np.zeros(size)
+    equalized_grey_level = np.zeros(size)
+    histogram_cumulative[0] = histogram_image[0]
+    lines, columns = matrix.shape
+    p = (lines*columns)/255
+
+    # cumulative histogram
+    for grey_level in range(1, histogram_image.size - 1):
+        histogram_cumulative[grey_level] = histogram_cumulative[grey_level-1] + histogram_image[grey_level]
+
+    for grey_level in range(histogram_cumulative.size):
+        columative = histogram_cumulative[grey_level]
+        if columative == 0:
+            equalized_grey_level[grey_level] = 0
+        else:
+            equalized_grey_level[grey_level] = max(0, int(histogram_cumulative[grey_level]/p - 1))
+
+    for line in range(lines):
+        for column in range(columns):
+            grey_level = int(matrix.item(line, column))
+            matrix[line][column] = equalized_grey_level[grey_level]
+
+    print(p)
+    print(equalized_grey_level[equalized_grey_level.size -1])
+
+    plot_histogram(equalized_grey_level)
+
+    return matrix
+
+#matrix = np.random.rand(3,3)*10
+#matrix = matrix.astype(int)
+#print(matrix)
+#smoothing(matrix)
+img = mpimg.imread('D:\Pictures\elephant.jpg')
+[B, G, R] = channel_split(img)
+
+
 gray = rgb2gray(img)
 
+histogram_gray = histogram(gray, 256)
+equalized_image = equalization(gray, histogram_gray)
+#print(histogram_gray.shape)
+#plot_histogram(histogram_gray)
 
 
-img_modified = np.array(img)
-img_modified = change_intesity(img_modified, -50)
-print(img_modified[0][0][0])
-print(img[0][0][0])
-
-plt.imshow(img_modified)
+plt.imshow(equalized_image, cmap= "Greys_r")
 plt.show()
 
-plt.imshow(img)
+exit()
+#smoothing()
+
+img_s = smoothing_median(gray)
+plt.imshow(img_s, cmap= "Greys_r")
 plt.show()
 
+#img_modified = np.array(img)
+#img_modified = change_intesity(img_modified, -100)
 
 
-#print(gray.item(0, 0))
-
-[B, G, R] = cv2.split(img)
-
-#print(img[0][1][1])
-#print(img.item(0,1,2))
-#print(img)
-
-#img_concat = np.append([B], [G], [R], axis=0)
-#print(img_concat.shape)
-merged_image = cv2.merge((B, G, R))
-#print(gray.shape)
-
-#histogram_array = histogram(gray, 256)
-#print(histogram_array.shape)
-#plot_histogram(histogram_array)
-
-#print(histogram_array.shape)
-#print(histogram_array)
-
-#plt.imshow(R,cmap = "Reds")
+#plt.imshow(img_modified)
 #plt.show()
 
-#print(gray.shape)
-#print(B.shape)
-
-
+#plt.imshow(img)
 #plt.show()
+
+
 
