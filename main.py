@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import sys
 import cv2
 
 
@@ -73,8 +74,6 @@ def change_intesity(matrix, parameter):
 def smoothing_average( matrix ):
 
     lines, columns = matrix.shape
-    print(lines)
-    print(columns)
 
     for line in range(lines):
         for column in range(columns):
@@ -93,7 +92,6 @@ def smoothing_average( matrix ):
 def smoothing_median( matrix ):
 
     lines, columns = matrix.shape
-
     for line in range(lines):
         for column in range(columns):
             mask = []
@@ -135,48 +133,59 @@ def equalization ( matrix, histogram_image ):
             grey_level = int(matrix.item(line, column))
             matrix[line][column] = equalized_grey_level[grey_level]
 
-    print(p)
-    print(equalized_grey_level[equalized_grey_level.size -1])
-
-    plot_histogram(equalized_grey_level)
-
     return matrix
 
-#matrix = np.random.rand(3,3)*10
-#matrix = matrix.astype(int)
-#print(matrix)
-#smoothing(matrix)
-img = mpimg.imread('D:\Pictures\elephant.jpg')
-[B, G, R] = channel_split(img)
 
 
+# Check input variable
+if len(sys.argv) > 1:
+    image_path = sys.argv[1]
+    if len(sys.argv) > 2:
+        options = sys.argv[2]
+        if len(sys.argv) > 3:
+            parameters = sys.argv[3]
+else:
+    exit()
+
+
+img = mpimg.imread(image_path)
 gray = rgb2gray(img)
-
-histogram_gray = histogram(gray, 256)
-equalized_image = equalization(gray, histogram_gray)
-#print(histogram_gray.shape)
-#plot_histogram(histogram_gray)
-
-
-plt.imshow(equalized_image, cmap= "Greys_r")
+plt.imshow(gray, cmap= "Greys_r")
 plt.show()
+
+if options == "-histogram":
+
+    histogram_gray = histogram(gray, 256)
+    plot_histogram(histogram_gray)
+
+if options == "-intensity":
+
+    img_modifed = change_intesity(gray, int(parameters))
+    plt.imshow(img_modifed, cmap="Greys_r")
+    plt.show()
+
+if options == "-average_filter":
+
+    img_modifed  = smoothing_average(gray)
+    plt.imshow(img_modifed, cmap="Greys_r")
+    plt.show()
+
+if options == "-median_filter":
+
+    img_modifed  = smoothing_median(gray)
+    plt.imshow(img_modifed, cmap="Greys_r")
+    plt.show()
+
+if options == "-equalization":
+
+    histogram_gray = histogram(gray, 256)
+    img_modifed  = equalization(gray, histogram_gray)
+    plt.imshow(img_modifed, cmap="Greys_r")
+    plt.show()
+
 
 exit()
-#smoothing()
 
-img_s = smoothing_median(gray)
-plt.imshow(img_s, cmap= "Greys_r")
-plt.show()
-
-#img_modified = np.array(img)
-#img_modified = change_intesity(img_modified, -100)
-
-
-#plt.imshow(img_modified)
-#plt.show()
-
-#plt.imshow(img)
-#plt.show()
 
 
 
